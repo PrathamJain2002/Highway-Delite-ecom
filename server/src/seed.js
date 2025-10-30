@@ -19,6 +19,7 @@ const ExperienceSchema = new mongoose.Schema({
         {
           time: String,
           soldOut: Boolean,
+          left: Number,
         },
       ],
     },
@@ -42,10 +43,10 @@ const sample = [
     shortDescription: 'Curated small-group experience. Certified guide.',
     description: 'Curated small-group experience. Certified guide. Safety first with gear included. Helmet and life jackets along with an expert will accompany in kayaking.',
     days: [0,1,2,3].map((i) => ({ date: day(i), slots: [
-      { time: '07:00 am', soldOut: i===1 },
-      { time: '09:00 am', soldOut: false },
-      { time: '11:00 am', soldOut: i===2 },
-      { time: '01:00 pm', soldOut: true },
+      (() => { const soldOut = i===1; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '07:00 am', soldOut, left } })(),
+      (() => { const soldOut = false; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '09:00 am', soldOut, left } })(),
+      (() => { const soldOut = i===2; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '11:00 am', soldOut, left } })(),
+      (() => { const soldOut = true; const left = 0; return { time: '01:00 pm', soldOut, left } })(),
     ] }))
   },
   {
@@ -56,9 +57,9 @@ const sample = [
     shortDescription: 'Certified guide. Safety first with gear included.',
     description: 'Scenic routes, trained guides, and safety briefing. Minimum age 10.',
     days: [0,1,2,3].map((i) => ({ date: day(i), slots: [
-      { time: '06:00 am', soldOut: false },
-      { time: '08:00 am', soldOut: i===0 },
-      { time: '10:00 am', soldOut: false },
+      (() => { const soldOut = false; const left = Math.floor(Math.random()*10)+1; return { time: '06:00 am', soldOut, left } })(),
+      (() => { const soldOut = i===0; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '08:00 am', soldOut, left } })(),
+      (() => { const soldOut = false; const left = Math.floor(Math.random()*10)+1; return { time: '10:00 am', soldOut, left } })(),
     ] }))
   },
   {
@@ -69,9 +70,9 @@ const sample = [
     shortDescription: 'Curated small-group experience. Certified guide.',
     description: 'Visit lush estates and taste fresh brews among the hills.',
     days: [0,1,2,3].map((i) => ({ date: day(i), slots: [
-      { time: '09:00 am', soldOut: false },
-      { time: '11:00 am', soldOut: false },
-      { time: '01:00 pm', soldOut: false },
+      (() => { const soldOut = false; const left = Math.floor(Math.random()*10)+1; return { time: '09:00 am', soldOut, left } })(),
+      (() => { const soldOut = false; const left = Math.floor(Math.random()*10)+1; return { time: '11:00 am', soldOut, left } })(),
+      (() => { const soldOut = false; const left = Math.floor(Math.random()*10)+1; return { time: '01:00 pm', soldOut, left } })(),
     ] }))
   }
 ]

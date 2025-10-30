@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 
-type Slot = { time: string; soldOut: boolean }
+type Slot = { time: string; soldOut: boolean; left?: number }
 type Day = { date: string; slots: Slot[] }
 type Experience = {
   _id: string
@@ -40,6 +40,12 @@ export default function Details() {
     if (!exp || !selectedDate) return []
     return exp.days.find((d) => d.date === selectedDate)?.slots ?? []
   }, [exp, selectedDate])
+
+  const selectedSlotLeft = useMemo(() => {
+    if (!selectedTime) return null
+    const slot = slotsForDay.find((s) => s.time === selectedTime)
+    return slot?.left ?? null
+  }, [slotsForDay, selectedTime])
 
   const subtotal = useMemo(() => (exp ? exp.price * quantity : 0), [exp, quantity])
   const taxes = useMemo(() => Math.round((exp?.price || 0) * 0.059 * quantity), [exp?.price, quantity])
@@ -91,7 +97,11 @@ export default function Details() {
                   onClick={() => setSelectedTime(s.time)}
                   className={`px-3 py-1.5 rounded border text-sm disabled:opacity-40 ${selectedTime===s.time ? 'border-black' : 'bg-white'}`}
                 >
-                  {s.time} {s.soldOut && <span className="text-red-600 ml-1">Sold out</span>}
+                  {s.time} {s.soldOut ? (
+                    <span className="text-red-600 ml-1">Sold out</span>
+                  ) : (
+                    <span className="text-red-500 ml-2">{s.left ?? 0} left</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -123,7 +133,7 @@ export default function Details() {
                 <button
                   type="button"
                   aria-label="Increase quantity"
-                  onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                  onClick={() => setQuantity((q) => Math.min(selectedSlotLeft ?? 10, q + 1))}
                   className="w-7 h-7 grid place-items-center border rounded bg-[#EFEFEF]"
                 >
                   +

@@ -29,6 +29,7 @@ const ExperienceSchema = new mongoose.Schema({
         {
           time: String,
           soldOut: Boolean,
+          left: Number,
         },
       ],
     },
@@ -91,10 +92,10 @@ function seedMemory() {
     days: [0, 1, 2, 3].map((i) => ({
       date: day(i),
       slots: [
-        { time: '07:00 am', soldOut: i === 1 },
-        { time: '09:00 am', soldOut: false },
-        { time: '11:00 am', soldOut: i === 2 },
-        { time: '01:00 pm', soldOut: i === 0 },
+        (() => { const soldOut = i === 1; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '07:00 am', soldOut, left } })(),
+        (() => { const soldOut = false; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '09:00 am', soldOut, left } })(),
+        (() => { const soldOut = i === 2; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '11:00 am', soldOut, left } })(),
+        (() => { const soldOut = i === 0; const left = soldOut ? 0 : Math.floor(Math.random()*10)+1; return { time: '01:00 pm', soldOut, left } })(),
       ],
     })),
   }))
@@ -114,14 +115,36 @@ app.get('/health', (_, res) => res.json({ ok: true }))
 
 app.get('/experiences', async (_, res) => {
   const list = useDb ? await Experience.find({}).lean() : memory.experiences
-  res.json(list)
+  const withLeft = list.map((e) => ({
+    ...e,
+    days: e.days.map((d) => ({
+      ...d,
+      slots: d.slots.map((s) => {
+        if (s.soldOut) return { ...s, left: 0 }
+        const left = typeof s.left === 'number' ? s.left : Math.floor(Math.random() * 10) + 1
+        return { ...s, left }
+      }),
+    })),
+  }))
+  res.json(withLeft)
 })
 
 app.get('/experiences/:id', async (req, res) => {
   const id = req.params.id
   const item = useDb ? await Experience.findById(id).lean() : memory.experiences.find((e) => e._id === id)
   if (!item) return res.status(404).json({ message: 'Not found' })
-  res.json(item)
+  const withLeft = {
+    ...item,
+    days: item.days.map((d) => ({
+      ...d,
+      slots: d.slots.map((s) => {
+        if (s.soldOut) return { ...s, left: 0 }
+        const left = typeof s.left === 'number' ? s.left : Math.floor(Math.random() * 10) + 1
+        return { ...s, left }
+      }),
+    })),
+  }
+  res.json(withLeft)
 })
 
 app.post('/promo/validate', (req, res) => {
