@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App shell */
+html, body, #root {
+  height: 100%;
+}
+body {
+  @apply bg-white text-neutral-900 antialiased;
+}
+
+@layer base {
+  button {
+    @apply bg-brand-yellow text-black rounded-lg;
+  }
+  button:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+}
