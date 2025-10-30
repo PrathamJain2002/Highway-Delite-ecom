@@ -112,6 +112,8 @@ init().catch(console.error)
 
 // API
 app.get('/health', (_, res) => res.json({ ok: true }))
+app.head('/health', (_, res) => res.status(200).end())
+app.get('/', (_, res) => res.send('OK'))
 
 app.get('/experiences', async (_, res) => {
   const list = useDb ? await Experience.find({}).lean() : memory.experiences
